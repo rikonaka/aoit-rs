@@ -28,6 +28,14 @@ pub struct SerdeConfig {
     data: Vec<HashMap<String, String>>,
 }
 
+#[test]
+fn append() {
+    let mut a = vec![0, 1, 3];
+    let mut b = vec![];
+    a.append(&mut b);
+    println!("{:?}", a);
+}
+
 fn main() {
     let args = Args::parse();
     if args.pack != "null" {
