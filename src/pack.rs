@@ -20,15 +20,29 @@ fn resolve_depends(package_name: &str) -> Option<Vec<String>> {
     // println!("{}", command_output);
     let mut lines = command_output.lines();
     let _ = lines.next(); // jump over first line
+    let mut sp_depends_flag = false;
     for l in lines {
         if l.contains("Depends:") {
-            let l_split: Vec<&str> = l.split(": ").collect();
-            let depend_name = if l_split.len() == 2 {
-                l_split[1]
+            if l.contains("<") && l.contains(">") {
+                sp_depends_flag = true;
             } else {
-                panic!("Depends length error please contact developer");
-            };
-            depend_vec.push(depend_name.trim().to_string())
+                let l_split: Vec<&str> = l.split(": ").collect();
+                let depend_name = if l_split.len() == 2 {
+                    l_split[1]
+                } else {
+                    panic!("Depends length error please contact developer");
+                };
+                let depend_name = depend_name.trim().to_string();
+                if !depend_vec.contains(&depend_name) {
+                    depend_vec.push(depend_name);
+                }
+            }
+        } else if sp_depends_flag {
+            let depend_name = l.trim().to_string();
+            if !depend_vec.contains(&depend_name) {
+                depend_vec.push(depend_name);
+            }
+            sp_depends_flag = false;
         }
     }
     Some(depend_vec)
