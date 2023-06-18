@@ -1,6 +1,6 @@
 # aoit-rs
 
-Apt offline installation tool
+Apt offline installation tool (only support `Debian` and `Ubuntu` distribution).
 
 ## Requirements
 
