@@ -72,6 +72,12 @@ pub fn pack_deb(package_name: &str) {
     let mut fake_tree: Vec<HashMap<String, String>> = Vec::new();
 
     let depends_vec = resolve_depends(package_name).unwrap();
+    if depends_vec.len() == 0 {
+        println!("The [{}] package does not exist", package_name);
+        utils::remove_dir(target_dir);
+        return;
+    }
+
     let package_full_name = download_depends(package_name, &target_dir).unwrap();
     // println!("{}", package_full_name);
     let mut hm: HashMap<String, String> = HashMap::new();
