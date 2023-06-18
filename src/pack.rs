@@ -60,9 +60,9 @@ pub fn pack_deb(package_name: &str) {
     // let target_dir = format!("./{}", package_name);
     let target_dir = package_name;
     match utils::create_dir(&target_dir) {
-        true => println!("Create dir {} success", &target_dir),
+        true => println!("Create tmp dir success"),
         false => {
-            println!("Create dir {} failed", &target_dir);
+            println!("Create tmp dir failed");
             return;
         }
     }
