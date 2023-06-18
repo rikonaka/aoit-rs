@@ -49,7 +49,7 @@ aoit  vim.aoit  vim.aoit.sha256
 
 Do not change any files, including `naming` and `content`, and make sure all three files are copied to a `USB` or `CD`.
 
-## In B server, offline installation of vim
+### In B server, offline installation of vim
 
 Check for the presence of these three files.
 
