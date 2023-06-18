@@ -10,7 +10,7 @@ fn install_depends(package_path: &str) {
         .arg("--install")
         .arg(package_path)
         .output()
-        .expect("failed to excute apt install");
+        .expect("Failed to excute apt install");
 
     // println!("{}", String::from_utf8_lossy(&c.stdout));
 }
@@ -35,7 +35,7 @@ pub fn install_deb(aoitfile_name: &str) {
     let target_dir = if aoitfile_name_split.len() >= 2 {
         aoitfile_name_split[0].to_string()
     } else {
-        panic!("Filename error, Standard files should end with aoit");
+        panic!("Filename error, standard files should end with aoit");
     };
 
     // decompress 7z package

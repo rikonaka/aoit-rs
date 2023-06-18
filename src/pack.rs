@@ -14,7 +14,7 @@ fn resolve_depends(package_name: &str) -> Option<Vec<String>> {
         .arg("depends")
         .arg(package_name)
         .output()
-        .expect("failed to execute apt-cache");
+        .expect("Failed to execute apt-cache");
 
     let command_output = String::from_utf8_lossy(&command.stdout);
     // println!("{}", command_output);
@@ -39,7 +39,7 @@ fn download_depends(package_name: &str, target_dir: &str) -> Option<String> {
         .arg("download")
         .arg(package_name)
         .output()
-        .expect("failed to execute apt download");
+        .expect("Failed to execute apt download");
 
     let pattern = format!("{}*.deb", package_name);
     for entry in glob(&pattern).expect("Failed to read glob pattern") {
