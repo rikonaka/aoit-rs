@@ -4,13 +4,13 @@ Apt offline installation tool
 
 ## Requirements
 
-- [x] Two servers, one can be networked called `A`, one **can not** be networked called `B`.
-- [x] `A` server with the same `architecture` and the same `distribution` as the `b` server, and with a good network.
+- [x] Two servers, one can be networked called A, one **can not** be networked called B.
+- [x] A server with the same `architecture` and the same `distribution` as the B server, and with a good network.
 - [x] Both servers must have sufficient hard disk space.
 
 ## Usage
 
-### In `A` server, pack all the dependencies of a package
+### In A server, pack all the dependencies of a package
 
 We use `vim` as example.
 
@@ -49,7 +49,7 @@ aoit  vim.aoit  vim.aoit.sha256
 
 Do not change any files, including `naming` and `content`, and make sure all three files are copied to a `USB` or `CD`.
 
-## In `B` server, offline installation of vim
+## In B server, offline installation of vim
 
 Check for the presence of these three files.
 
