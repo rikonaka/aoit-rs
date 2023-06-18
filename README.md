@@ -1,6 +1,6 @@
 # aoit-rs
 
-Apt offline installation tool (support `Debian` series distribution only).
+Apt offline installation tool (support `Debian` family distribution only).
 
 ## Requirements
 
