@@ -77,4 +77,10 @@ Removing tmp dir...
 Done
 ```
 
+Fixing apt dependencies
+
+```bash
+apt install -f
+```
+
 If this process does not have any error messages, the installation is successful and you can now use the offline installed `vim`.
