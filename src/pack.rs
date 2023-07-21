@@ -53,10 +53,10 @@ fn download_depends(package_name: &str, target_dir: &str) -> Option<String> {
         .arg("download")
         .arg(package_name)
         .output()
-        .expect("Failed to execute apt download");
+        .expect("failed to execute apt download");
 
     let pattern = format!("{}*.deb", package_name);
-    for entry in glob(&pattern).expect("Failed to read glob pattern") {
+    for entry in glob(&pattern).expect("failed to read glob pattern") {
         match entry {
             Ok(path) => {
                 // println!("{:?}", path.display());
@@ -74,9 +74,9 @@ pub fn pack_deb(package_name: &str) {
     // let target_dir = format!("./{}", package_name);
     let target_dir = package_name;
     match utils::create_dir(&target_dir) {
-        true => println!("Create tmp dir success"),
+        true => println!("Create tmp dir success..."),
         false => {
-            println!("Create tmp dir failed");
+            println!("Create tmp dir failed...");
             return;
         }
     }

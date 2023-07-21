@@ -10,14 +10,13 @@ fn install_depends(package_path: &str) {
         .arg("--install")
         .arg(package_path)
         .output()
-        .expect("Failed to excute apt install");
+        .expect("failed to excute apt install");
 
     // println!("{}", String::from_utf8_lossy(&c.stdout));
 }
 
 pub fn install_deb(aoitfile_name: &str) {
     // aoitfile_name: vim.aoit
-
     // sha256 check
     println!("Checking...");
     let hash_filename = format!("{}.{}", aoitfile_name, DEFAULT_SHA256_SUFFIX);
@@ -25,9 +24,9 @@ pub fn install_deb(aoitfile_name: &str) {
     let contents = utils::read_file_bytes(&hash_filename).unwrap();
     let contents = String::from_utf8_lossy(&contents).to_string();
     if hash_str.trim() != contents.trim() {
-        panic!("Check sha256 failed");
+        panic!("check sha256 failed");
     } else {
-        println!("Check sha256 success");
+        println!("Check sha256 success...");
     }
 
     // get target dir name
@@ -35,7 +34,7 @@ pub fn install_deb(aoitfile_name: &str) {
     let target_dir = if aoitfile_name_split.len() >= 2 {
         aoitfile_name_split[0].to_string()
     } else {
-        panic!("Filename error, standard files should end with aoit");
+        panic!("filename error, standard files should end with aoit");
     };
 
     // decompress 7z package

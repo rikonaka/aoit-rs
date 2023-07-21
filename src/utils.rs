@@ -11,7 +11,7 @@ pub fn move_file_to_dir(filename: &str, target_dir: &str) {
         .arg(filename)
         .arg(target_dir)
         .output()
-        .expect("Failed to execute apt download");
+        .expect("failed to execute apt download");
 }
 
 pub fn remove_dir(target_dir: &str) {
@@ -19,7 +19,7 @@ pub fn remove_dir(target_dir: &str) {
         .arg("-rf")
         .arg(target_dir)
         .output()
-        .expect("Failed to execute apt download");
+        .expect("failed to execute apt download");
 }
 
 pub fn read_file_bytes(path: &str) -> Option<Vec<u8>> {
