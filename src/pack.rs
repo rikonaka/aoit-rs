@@ -1,12 +1,72 @@
+use anyhow::Result;
 use glob::glob;
+use log::debug;
+use log::error;
+use log::info;
+use log::warn;
+use serde::Deserialize;
+use serde::Serialize;
 use sevenz_rust;
-use std::{collections::HashMap, process::Command};
+use std::collections::HashMap;
+use std::process::Command;
 
 use crate::utils;
 use crate::SerdeConfig;
 use crate::DEFAULT_CONFIG_NAME;
 use crate::DEFAULT_PACKAGE_SUFFIX;
 use crate::DEFAULT_SHA256_SUFFIX;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AptDepends {
+    pub name: String,
+    pub depends: Vec<AptDepends>,
+}
+
+impl AptDepends {
+    pub fn new(name: &str, depends: &[AptDepends]) -> AptDepends {
+        AptDepends {
+            name: name.to_string(),
+            depends: depends.to_vec(),
+        }
+    }
+}
+
+fn apt_cache_depends_parser(package_name: &str) -> Result<Vec<AptDepends>> {
+    debug!("apt cache depends parser: {package_name}");
+    println!("apt cache depends parser: {package_name}");
+    let command = Command::new("apt-cache")
+        .arg("depends")
+        .arg(package_name)
+        .output()?;
+
+    let mut ret = Vec::new();
+    let command_output = String::from_utf8_lossy(&command.stdout);
+    for line in command_output.lines() {
+        if line.contains("Depends:") && !line.contains("|") {
+            let line_split: Vec<&str> = line
+                .split(":")
+                .map(|x| x.trim())
+                .filter(|x| x.len() > 0)
+                .collect();
+
+            if line_split.len() == 2 {
+                let depends_package_name = line_split[1];
+                let depends = apt_cache_depends_parser(depends_package_name)?;
+                let apt_depends = AptDepends::new(depends_package_name, &depends);
+                ret.push(apt_depends);
+            }
+        }
+    }
+
+    Ok(ret)
+}
+
+fn resolve_depends_new(package_name: &str) -> Result<AptDepends> {
+    println!("apt cache depends parser: {package_name}");
+    let root_depends = apt_cache_depends_parser(package_name)?;
+    let root = AptDepends::new(&package_name, &root_depends);
+    Ok(root)
+}
 
 fn resolve_depends(package_name: &str) -> Option<Vec<String>> {
     let mut depend_vec: Vec<String> = Vec::new();
@@ -74,9 +134,9 @@ pub fn pack_deb(package_name: &str) {
     // let target_dir = format!("./{}", package_name);
     let target_dir = package_name;
     match utils::create_dir(&target_dir) {
-        true => println!("Create tmp dir success..."),
+        true => println!("Create tmp dir success!"),
         false => {
-            println!("Create tmp dir failed...");
+            println!("Create tmp dir failed!");
             return;
         }
     }
@@ -138,4 +198,23 @@ pub fn pack_deb(package_name: &str) {
     println!("Removing tmp dir...");
     utils::remove_dir(target_dir);
     println!("Done");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use env_logger;
+    #[test]
+    fn test_resolve_depends() {
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Debug)
+            .is_test(true)
+            .try_init()
+            .unwrap();
+
+        println!("Test");
+        let package_name = "postgresql"; // for test
+        let ret = resolve_depends_new(package_name).unwrap();
+        println!("{:?}", ret);
+    }
 }

@@ -1,5 +1,6 @@
 use clap::Parser;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
 use std::collections::HashMap;
 
 mod install;
@@ -26,23 +27,6 @@ struct Args {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SerdeConfig {
     data: Vec<HashMap<String, String>>,
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let result = 2 + 2;
-        assert_eq!(result, 4);
-    }
-    #[test]
-    fn append() {
-        let mut a = vec![0, 1, 2];
-        let mut b = vec![];
-        a.append(&mut b);
-        // println!("{:?}", a);
-        assert_eq!(a, vec![0, 1, 2]);
-    }
 }
 
 fn main() {
