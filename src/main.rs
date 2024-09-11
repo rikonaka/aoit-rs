@@ -1,7 +1,11 @@
 use clap::Parser;
+use env_logger;
+use log::error;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+
+use pack::AptDepends;
 
 mod install;
 mod pack;
@@ -15,26 +19,44 @@ const DEFAULT_SHA256_SUFFIX: &str = "sha256";
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// For packaging deb dependencies
+    /// Packaging deb dependencies
     #[arg(short, long, default_value = "null")]
     pack: String,
 
     /// Install the packaged deb dependencies
     #[arg(short, long, default_value = "null")]
     install: String,
+
+    /// Verbose
+    #[arg(short, long, action)]
+    verbose: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SerdeConfig {
-    data: Vec<HashMap<String, String>>,
+    apt_depends: AptDepends,
+    packages_vec: Vec<String>,
+    packages_map: HashMap<String, String>,
 }
 
 fn main() {
+    // env_logger::init();
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Debug)
+        .is_test(true)
+        .try_init()
+        .unwrap();
     let args = Args::parse();
     if args.pack != "null" {
-        pack::pack_deb(&args.pack);
+        match pack::pack_deb(&args.pack) {
+            Ok(_) => (),
+            Err(e) => error!("pack deb failed: {e}"),
+        };
     } else if args.install != "null" {
-        install::install_deb(&args.install);
+        match install::install_deb(&args.install) {
+            Ok(_) => (),
+            Err(e) => error!("install deb failed: {e}"),
+        };
     } else {
         println!("Use --help for more infomation");
     }

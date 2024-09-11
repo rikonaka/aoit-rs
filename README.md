@@ -12,7 +12,7 @@ Apt offline installation tool (support `Debian` family distribution only).
 
 ### In A server, pack all the dependencies of a package
 
-We use `vim` as example.
+We use `vim` package as example.
 
 Create a work folder.
 

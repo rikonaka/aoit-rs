@@ -1,119 +1,93 @@
-use sha2::{Digest, Sha256};
+use anyhow::Result;
+use sha2::Digest;
+use sha2::Sha256;
 use std::fs;
-use std::fs::{read, File};
-use std::io::{Read, Write};
+use std::fs::read;
+use std::fs::File;
+use std::io::Read;
+use std::io::Write;
 use std::process::Command;
 
 use crate::SerdeConfig;
 
-pub fn move_file_to_dir(filename: &str, target_dir: &str) {
-    let _ = Command::new("mv")
-        .arg(filename)
-        .arg(target_dir)
-        .output()
-        .expect("failed to execute apt download");
+pub fn move_file_to_dir(target_dir: &str, filename: &str) -> Result<()> {
+    let _ = Command::new("mv").arg(filename).arg(target_dir).output()?;
+    Ok(())
 }
 
-pub fn remove_dir(target_dir: &str) {
-    let _ = Command::new("rm")
-        .arg("-rf")
-        .arg(target_dir)
-        .output()
-        .expect("failed to execute apt download");
+pub fn remove_dir(target_dir: &str) -> Result<()> {
+    let _ = Command::new("rm").arg("-rf").arg(target_dir).output()?;
+    Ok(())
 }
 
-pub fn read_file_bytes(path: &str) -> Option<Vec<u8>> {
+pub fn read_file_bytes(path: &str) -> Result<Vec<u8>> {
     let mut file = match File::open(path) {
         Ok(f) => f,
-        Err(e) => {
-            println!("Failed to read aoit file: {}", e);
-            return None;
-        }
+        Err(e) => return Err(e.into()),
     };
     let mut contents = Vec::new();
     match file.read_to_end(&mut contents) {
         Ok(_) => (),
-        Err(e) => {
-            println!("Failed to read aoit as bytes: {}", e);
-            return None;
-        }
+        Err(e) => return Err(e.into()),
     }
-    Some(contents)
+    Ok(contents)
 }
 
-pub fn read_file_str(path: &str) -> Option<String> {
+pub fn read_file_str(path: &str) -> Result<String> {
     let mut file = match File::open(path) {
         Ok(f) => f,
-        Err(e) => {
-            println!("Failed to read aoit file: {}", e);
-            return None;
-        }
+        Err(e) => return Err(e.into()),
     };
     let mut contents = String::new();
     match file.read_to_string(&mut contents) {
         Ok(_) => (),
-        Err(e) => {
-            println!("Failed to read aoit as bytes: {}", e);
-            return None;
-        }
+        Err(e) => return Err(e.into()),
     }
-    Some(contents)
+    Ok(contents)
 }
 
-pub fn create_dir(dirname: &str) -> bool {
+pub fn create_dir(dirname: &str) -> Result<()> {
     match fs::create_dir(dirname) {
-        Ok(_) => true,
-        Err(e) => {
-            println!("Create target dir failed: {}", e);
-            false
-        }
+        Ok(_) => Ok(()),
+        Err(e) => Err(e.into()),
     }
 }
 
-pub fn create_file(filename: &str) -> Option<File> {
+pub fn create_file(filename: &str) -> Result<File> {
     match File::create(filename) {
-        Ok(f) => Some(f),
-        Err(e) => {
-            println!("Failed create sha256 file: {}", e);
-            None
-        }
+        Ok(f) => Ok(f),
+        Err(e) => Err(e.into()),
     }
 }
 
-pub fn file_sha256(filename: &str) -> Option<String> {
-    let contents = read(filename).unwrap();
+pub fn file_sha256(filename: &str) -> Result<String> {
+    let contents = read(filename)?;
     let hash = Sha256::digest(&contents);
     // println!("{:x}", hash);
     let hash_str = format!("{:x}", hash);
-    Some(hash_str)
+    Ok(hash_str)
 }
 
-pub fn write_to_file(filename: &str, contents: &str) -> bool {
-    let mut file = create_file(filename).unwrap();
+pub fn write_to_file(filename: &str, contents: &str) -> Result<()> {
+    let mut file = create_file(filename)?;
     match file.write_all(contents.as_bytes()) {
-        Ok(_) => true,
-        Err(e) => {
-            println!("Failed to write config file: {}", e);
-            false
-        }
+        Ok(_) => Ok(()),
+        Err(e) => Err(e.into()),
     }
 }
 
-pub fn serde_to_file(filename: &str, serde_config: SerdeConfig) -> bool {
+pub fn serde_config_to_file(filename: &str, serde_config: SerdeConfig) -> Result<()> {
     let serialized = match serde_json::to_string(&serde_config) {
         Ok(s) => s,
-        _ => return false,
+        Err(e) => return Err(e.into()),
     };
     write_to_file(filename, &serialized)
 }
 
-pub fn serde_from_file(filename: &str) -> Option<SerdeConfig> {
-    let contents = read_file_str(filename).unwrap();
+pub fn serde_from_file(filename: &str) -> Result<SerdeConfig> {
+    let contents = read_file_str(filename)?;
     match serde_json::from_str(&contents) {
-        Ok(s) => Some(s),
-        Err(e) => {
-            println!("serde from file {} failed: {}", filename, e);
-            None
-        }
+        Ok(s) => Ok(s),
+        Err(e) => Err(e.into()),
     }
 }

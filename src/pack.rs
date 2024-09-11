@@ -3,7 +3,7 @@ use glob::glob;
 use log::debug;
 use log::error;
 use log::info;
-use log::warn;
+// use log::warn;
 use serde::Deserialize;
 use serde::Serialize;
 use sevenz_rust;
@@ -31,9 +31,14 @@ impl AptDepends {
     }
 }
 
-fn apt_cache_depends_parser(package_name: &str) -> Result<Vec<AptDepends>> {
-    debug!("apt cache depends parser: {package_name}");
-    println!("apt cache depends parser: {package_name}");
+fn resolve_depends(package_name: &str, packags_vec: &mut Vec<String>) -> Result<Vec<AptDepends>> {
+    info!("package_name: {package_name}");
+    if packags_vec.contains(&package_name.to_string()) {
+        return Ok(vec![]);
+    } else {
+        packags_vec.push(package_name.to_string());
+    }
+
     let command = Command::new("apt-cache")
         .arg("depends")
         .arg(package_name)
@@ -51,7 +56,7 @@ fn apt_cache_depends_parser(package_name: &str) -> Result<Vec<AptDepends>> {
 
             if line_split.len() == 2 {
                 let depends_package_name = line_split[1];
-                let depends = apt_cache_depends_parser(depends_package_name)?;
+                let depends = resolve_depends(depends_package_name, packags_vec)?;
                 let apt_depends = AptDepends::new(depends_package_name, &depends);
                 ret.push(apt_depends);
             }
@@ -61,143 +66,88 @@ fn apt_cache_depends_parser(package_name: &str) -> Result<Vec<AptDepends>> {
     Ok(ret)
 }
 
-fn resolve_depends_new(package_name: &str) -> Result<AptDepends> {
-    println!("apt cache depends parser: {package_name}");
-    let root_depends = apt_cache_depends_parser(package_name)?;
+fn resolve_depends_root(package_name: &str) -> Result<(AptDepends, Vec<String>)> {
+    let mut packages_vec = Vec::new();
+    let root_depends = resolve_depends(package_name, &mut packages_vec)?;
     let root = AptDepends::new(&package_name, &root_depends);
-    Ok(root)
+    Ok((root, packages_vec))
 }
 
-fn resolve_depends(package_name: &str) -> Option<Vec<String>> {
-    let mut depend_vec: Vec<String> = Vec::new();
-    let command = Command::new("apt-cache")
-        .arg("depends")
-        .arg(package_name)
-        .output()
-        .expect("Failed to execute apt-cache");
-
-    let command_output = String::from_utf8_lossy(&command.stdout);
-    // println!("{}", command_output);
-    let mut lines = command_output.lines();
-    let _ = lines.next(); // jump over first line
-    let mut sp_depends_flag = false;
-    for l in lines {
-        if l.contains("Depends:") {
-            if l.contains("<") && l.contains(">") {
-                sp_depends_flag = true;
-            } else {
-                let l_split: Vec<&str> = l.split(": ").collect();
-                let depend_name = if l_split.len() == 2 {
-                    l_split[1]
-                } else {
-                    panic!("Depends length error please contact developer");
-                };
-                let depend_name = depend_name.trim().to_string();
-                if !depend_vec.contains(&depend_name) {
-                    depend_vec.push(depend_name);
-                }
-            }
-        } else if sp_depends_flag {
-            let depend_name = l.trim().to_string();
-            if !depend_vec.contains(&depend_name) {
-                depend_vec.push(depend_name);
-            }
-            sp_depends_flag = false;
-        }
-    }
-    Some(depend_vec)
-}
-
-fn download_depends(package_name: &str, target_dir: &str) -> Option<String> {
+fn download_depends(package_name: &str, target_dir: &str) -> Result<String> {
     let _ = Command::new("apt")
         .arg("download")
         .arg(package_name)
-        .output()
-        .expect("failed to execute apt download");
+        .output()?;
 
     let pattern = format!("{}*.deb", package_name);
-    for entry in glob(&pattern).expect("failed to read glob pattern") {
+    // Searching the downloaded package and move it to tmp dir.
+    for entry in glob(&pattern)? {
         match entry {
             Ok(path) => {
-                // println!("{:?}", path.display());
+                debug!("path: {}", path.display());
                 let package_full_name = path.to_string_lossy().to_string();
-                utils::move_file_to_dir(&package_full_name, &target_dir);
-                return Some(package_full_name);
+                utils::move_file_to_dir(&target_dir, &package_full_name)?;
+                return Ok(package_full_name);
             }
-            Err(e) => println!("{:?}", e),
+            Err(e) => {
+                return Err(e.into());
+            }
         }
     }
-    None
+    Ok(String::new())
 }
 
-pub fn pack_deb(package_name: &str) {
-    // let target_dir = format!("./{}", package_name);
+pub fn pack_deb(package_name: &str) -> Result<()> {
     let target_dir = package_name;
     match utils::create_dir(&target_dir) {
-        true => println!("Create tmp dir success!"),
-        false => {
-            println!("Create tmp dir failed!");
-            return;
+        Ok(_) => info!("Create tmp dir success!"),
+        Err(e) => {
+            error!("Create tmp dir failed: {e}!");
+            return Err(e);
         }
     }
 
-    let mut depends_all_vec: Vec<String> = Vec::new();
-    let mut index = 0;
-    let mut fake_tree: Vec<HashMap<String, String>> = Vec::new();
-
-    let depends_vec = resolve_depends(package_name).unwrap();
-    if depends_vec.len() == 0 {
-        println!("The [{}] package does not exist", package_name);
-        utils::remove_dir(target_dir);
-        return;
+    let (apt_depends, packages_vec) = resolve_depends_root(package_name)?;
+    if packages_vec.len() == 0 {
+        error!("The [{}] package does not exist!", package_name);
+        utils::remove_dir(target_dir)?;
+        return Ok(());
     }
 
-    let package_full_name = download_depends(package_name, &target_dir).unwrap();
-    // println!("{}", package_full_name);
-    let mut hm: HashMap<String, String> = HashMap::new();
-    hm.insert("name".to_string(), package_name.to_string());
-    hm.insert("full_name".to_string(), package_full_name.to_string());
-    fake_tree.push(hm);
-    depends_all_vec.append(&mut depends_vec.clone());
-
-    while depends_all_vec.len() > index {
-        let package_name = depends_all_vec.get(index).unwrap();
-        // print this in update mode
-        println!("Resolving depends: {}", package_name);
-        let depends_vec = resolve_depends(package_name).unwrap();
-        let package_full_name = download_depends(package_name, &target_dir).unwrap();
-
-        let mut hm: HashMap<String, String> = HashMap::new();
-        hm.insert("name".to_string(), package_name.to_string());
-        hm.insert("full_name".to_string(), package_full_name.to_string());
-        fake_tree.push(hm);
-
-        // println!("{}", package_full_name);
-        let mut depends_all_vec = depends_all_vec.clone();
-        depends_all_vec.append(&mut depends_vec.clone());
-        index = index + 1;
+    let mut packages_map = HashMap::new();
+    for p in &packages_vec {
+        debug!("package_name: {p}");
+        let package_full_name = download_depends(package_name, &target_dir)?;
+        debug!("package_full_name: {package_full_name}");
+        packages_map.insert(p.to_string(), package_full_name);
     }
 
     // serde config
-    let serde_config = SerdeConfig { data: fake_tree };
-    utils::serde_to_file(DEFAULT_CONFIG_NAME, serde_config);
-    utils::move_file_to_dir(DEFAULT_CONFIG_NAME, &target_dir);
+    let serde_config = SerdeConfig {
+        apt_depends,
+        packages_vec,
+        packages_map,
+    };
+    utils::serde_config_to_file(DEFAULT_CONFIG_NAME, serde_config)?;
+    utils::move_file_to_dir(&target_dir, DEFAULT_CONFIG_NAME)?;
 
     // compress
-    println!("Saving...");
+    info!("Saving...");
     let dest = format!("{}.{}", package_name, DEFAULT_PACKAGE_SUFFIX);
-    sevenz_rust::compress_to_path(target_dir, &dest).expect("compress ok");
+    sevenz_rust::compress_to_path(target_dir, &dest)?;
 
     // sha256 hash
-    println!("Hashing...");
-    let hash_str = utils::file_sha256(&dest).unwrap();
+    info!("Hashing...");
+    let hash_str = utils::file_sha256(&dest)?;
     let hash_filename = format!("{}.{}", dest, DEFAULT_SHA256_SUFFIX);
     let _ = utils::write_to_file(&hash_filename, &hash_str);
 
     // clean dir
-    println!("Removing tmp dir...");
-    utils::remove_dir(target_dir);
-    println!("Done");
+    info!("Removing tmp dir...");
+    utils::remove_dir(target_dir)?;
+    info!("Done");
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -205,16 +155,27 @@ mod tests {
     use super::*;
     use env_logger;
     #[test]
-    fn test_resolve_depends() {
-        let _ = env_logger::builder()
-            .filter_level(log::LevelFilter::Debug)
-            .is_test(true)
-            .try_init()
-            .unwrap();
-
-        println!("Test");
-        let package_name = "postgresql"; // for test
-        let ret = resolve_depends_new(package_name).unwrap();
-        println!("{:?}", ret);
+    fn test_resolve_depends() -> Result<()> {
+        // let _ = env_logger::builder()
+        //     .filter_level(log::LevelFilter::Debug)
+        //     .is_test(true)
+        //     .try_init()
+        //     .unwrap();
+        env_logger::init();
+        // let package_name = "postgresql"; // for test
+        let package_name = "vim"; // for test
+        let (apt_depends, packages) = resolve_depends_root(package_name)?;
+        println!("{:?}", apt_depends);
+        println!("{:?}", packages);
+        Ok(())
+    }
+    #[test]
+    fn test_download_depends() -> Result<()> {
+        env_logger::init();
+        let target_dir = "test";
+        // let package_name = "postgresql"; // for test
+        let package_name = "vim"; // for test
+        download_depends(package_name, target_dir)?;
+        Ok(())
     }
 }
