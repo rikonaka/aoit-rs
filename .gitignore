@@ -14,6 +14,5 @@ Cargo.lock
 *.pdb
 
 vim/
-vim_bak/
-sha256
-vim.aoit
+*.aoit
+*.sha256
