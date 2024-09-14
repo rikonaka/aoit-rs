@@ -10,6 +10,23 @@ Apt offline installation tool (support `Debian` family distribution only).
 - [x] A server with the same `architecture` and the same `distribution` as the B server, and with a good network.
 - [x] Both servers must have sufficient hard disk space.
 
+## Installtion
+
+
+### from `cargo install`
+
+Install rust first from [here](https://www.rust-lang.org/tools/install), then
+
+```bash
+cargo install aoit
+```
+
+### from release
+
+or just download from release [page](https://github.com/rikonaka/aoit-rs/releases) (only support x86_64 linux).
+
+**If you need software for other arch, try `cargo install` below.**
+
 ## Usage
 
 ### In A server, pack all the dependencies of a package
