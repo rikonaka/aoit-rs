@@ -2,6 +2,14 @@
 name = "aoit"
 version = "0.1.6"
 edition = "2021"
+authors = ["Riko Naka <xxy1836@gmail.com>"]
+license = "GPL-3.0-only"
+description = "Apt offline installation tool (support `Debian` family distribution only)."
+readme = "README.md"
+homepage = "https://github.com/rikonaka/aoit-rs"
+repository = "https://github.com/rikonaka/aoit-rs"
+keywords = ["apt", "debian", "offline"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
