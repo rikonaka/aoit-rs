@@ -16,7 +16,7 @@ fn install_depends(package_path: &str) -> Result<()> {
         .arg("--install")
         .arg(package_path)
         .output()?;
-    debug!("Install output: {}", String::from_utf8_lossy(&c.stdout));
+    debug!("install output: {}", String::from_utf8_lossy(&c.stdout));
     Ok(())
 }
 
