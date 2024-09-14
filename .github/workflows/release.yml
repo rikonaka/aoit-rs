@@ -30,7 +30,7 @@ jobs:
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
       - name: Build project
-        run: cargo build --release
+        run: cargo build --release --target x86_64-unknown-linux-musl
 
       - name: Create Release
         id: create_release
@@ -48,5 +48,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./target/x86_64-unknown-linux-musl/release/aoit
-          asset_name: aoit-${{ env.VERSION }}
+          asset_name: aoit-x86_64-unknown-linux-musl
           asset_content_type: application/octet-stream
