@@ -32,7 +32,7 @@ impl AptDepends {
 }
 
 fn resolve_depends(package_name: &str, packags_vec: &mut Vec<String>) -> Result<Vec<AptDepends>> {
-    debug!("Resolve package: {package_name}");
+    debug!("resolve package: {package_name}");
     if packags_vec.contains(&package_name.to_string()) {
         return Ok(vec![]);
     } else {
@@ -99,16 +99,16 @@ fn download_depends(package_name: &str, target_dir: &str) -> Result<String> {
 pub fn pack_deb(package_name: &str) -> Result<()> {
     let target_dir = package_name;
     match utils::create_dir(&target_dir) {
-        Ok(_) => info!("Create tmp dir success!"),
+        Ok(_) => info!("create tmp dir success!"),
         Err(e) => {
-            error!("Create tmp dir failed: {e}!");
+            error!("create tmp dir failed: {e}!");
             return Err(e);
         }
     }
 
     let (apt_depends, packages_vec) = resolve_depends_root(package_name)?;
     if packages_vec.len() == 0 {
-        error!("The [{}] package does not exist!", package_name);
+        error!("the [{}] package does not exist!", package_name);
         utils::remove_dir(target_dir)?;
         return Ok(());
     }
@@ -116,7 +116,7 @@ pub fn pack_deb(package_name: &str) -> Result<()> {
     let mut packages_map = HashMap::new();
     for p in &packages_vec {
         let package_full_name = download_depends(p, &target_dir)?;
-        info!("Downloading package: {p}[{package_full_name}]");
+        info!("downloading package: {p}[{package_full_name}]");
         packages_map.insert(p.to_string(), package_full_name);
     }
 
@@ -130,20 +130,20 @@ pub fn pack_deb(package_name: &str) -> Result<()> {
     utils::move_file_to_dir(&target_dir, DEFAULT_CONFIG_NAME)?;
 
     // compress
-    info!("Saving...");
+    info!("saving...");
     let dest = format!("{}.{}", package_name, DEFAULT_PACKAGE_SUFFIX);
     sevenz_rust::compress_to_path(target_dir, &dest)?;
 
     // sha256 hash
-    info!("Hashing...");
+    info!("hashing...");
     let hash_str = utils::file_sha256(&dest)?;
     let hash_filename = format!("{}.{}", dest, DEFAULT_SHA256_SUFFIX);
     let _ = utils::write_to_file(&hash_filename, &hash_str);
 
     // clean dir
-    info!("Removing tmp dir...");
+    info!("removing tmp dir...");
     utils::remove_dir(target_dir)?;
-    info!("Done");
+    info!("done!");
 
     Ok(())
 }

@@ -23,16 +23,16 @@ fn install_depends(package_path: &str) -> Result<()> {
 pub fn install_deb(aoitfile_name: &str) -> Result<()> {
     // aoitfile_name: vim.aoit
     // sha256 check
-    info!("Checking...");
+    info!("checking...");
     let hash_filename = format!("{}.{}", aoitfile_name, DEFAULT_SHA256_SUFFIX);
     let hash_str = utils::file_sha256(aoitfile_name)?;
     let contents = utils::read_file_bytes(&hash_filename)?;
     let contents = String::from_utf8_lossy(&contents).to_string();
     if hash_str.trim() != contents.trim() {
-        error!("Calc hash: {hash_str}, file hash: {contents}");
-        panic!("Check sha256 failed!");
+        error!("calc hash: {hash_str}, file hash: {contents}");
+        panic!("check sha256 failed!");
     } else {
-        info!("Check sha256 success!");
+        info!("check sha256 success!");
     }
 
     // get target dir name
@@ -40,11 +40,11 @@ pub fn install_deb(aoitfile_name: &str) -> Result<()> {
     let target_dir = if aoitfile_name_split.len() >= 2 {
         aoitfile_name_split[0].to_string()
     } else {
-        panic!("Wrong file name, standard files should end with aoit");
+        panic!("wrong file name, standard files should end with aoit");
     };
 
     // decompress 7z package
-    info!("Decompress aoit...");
+    info!("decompress aoit...");
     // let dest = format!("./{}", target_dir);
     utils::create_dir(&target_dir)?;
     sevenz_rust::decompress_file(aoitfile_name, &target_dir).expect("complete");
@@ -59,7 +59,7 @@ pub fn install_deb(aoitfile_name: &str) -> Result<()> {
         match serde_config.packages_map.get(&packages_name) {
             Some(packages_full_name) => {
                 let package_path = format!("{}/{}", target_dir, packages_full_name);
-                info!("Install: {}", packages_full_name);
+                info!("installing: {}", packages_full_name);
                 install_depends(&package_path)?;
             }
             None => warn!("package {packages_name} not found"),
@@ -67,8 +67,8 @@ pub fn install_deb(aoitfile_name: &str) -> Result<()> {
     }
 
     // delete decompress dir
-    info!("Removing tmp dir...");
+    info!("removing tmp dir...");
     utils::remove_dir(&target_dir)?;
-    info!("Done");
+    info!("done!");
     Ok(())
 }
