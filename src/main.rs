@@ -40,13 +40,21 @@ pub struct SerdeConfig {
 }
 
 fn main() {
-    // env_logger::init();
-    let _ = env_logger::builder()
-        .filter_level(log::LevelFilter::Debug)
-        .is_test(true)
-        .try_init()
-        .unwrap();
     let args = Args::parse();
+    if args.verbose {
+        // env_logger::init();
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Debug)
+            .is_test(true)
+            .try_init()
+            .unwrap();
+    } else {
+        let _ = env_logger::builder()
+            .filter_level(log::LevelFilter::Info)
+            .is_test(true)
+            .try_init()
+            .unwrap();
+    }
     if args.pack != "null" {
         match pack::pack_deb(&args.pack) {
             Ok(_) => (),

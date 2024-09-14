@@ -32,7 +32,7 @@ impl AptDepends {
 }
 
 fn resolve_depends(package_name: &str, packags_vec: &mut Vec<String>) -> Result<Vec<AptDepends>> {
-    info!("package_name: {package_name}");
+    debug!("package_name: {package_name}");
     if packags_vec.contains(&package_name.to_string()) {
         return Ok(vec![]);
     } else {
@@ -84,7 +84,6 @@ fn download_depends(package_name: &str, target_dir: &str) -> Result<String> {
     for entry in glob(&pattern)? {
         match entry {
             Ok(path) => {
-                debug!("path: {}", path.display());
                 let package_full_name = path.to_string_lossy().to_string();
                 utils::move_file_to_dir(&target_dir, &package_full_name)?;
                 return Ok(package_full_name);
@@ -116,9 +115,8 @@ pub fn pack_deb(package_name: &str) -> Result<()> {
 
     let mut packages_map = HashMap::new();
     for p in &packages_vec {
-        debug!("package_name: {p}");
-        let package_full_name = download_depends(package_name, &target_dir)?;
-        debug!("package_full_name: {package_full_name}");
+        let package_full_name = download_depends(p, &target_dir)?;
+        info!("downloading package: {p}[{package_full_name}]");
         packages_map.insert(p.to_string(), package_full_name);
     }
 
@@ -176,6 +174,13 @@ mod tests {
         // let package_name = "postgresql"; // for test
         let package_name = "vim"; // for test
         download_depends(package_name, target_dir)?;
+        Ok(())
+    }
+    #[test]
+    fn test_pack_deb() -> Result<()> {
+        // let package_name = "postgresql"; // for test
+        let package_name = "vim"; // for test
+        pack_deb(package_name)?;
         Ok(())
     }
 }

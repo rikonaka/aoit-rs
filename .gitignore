@@ -16,3 +16,4 @@ Cargo.lock
 vim/
 *.aoit
 *.sha256
+*.deb
