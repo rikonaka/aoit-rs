@@ -12,7 +12,6 @@ Apt offline installation tool (support `Debian` family distribution only).
 
 ## Installtion
 
-
 ### from `cargo install`
 
 Install rust first from [here](https://www.rust-lang.org/tools/install), then
@@ -25,7 +24,7 @@ cargo install aoit
 
 or just download from release [page](https://github.com/rikonaka/aoit-rs/releases) (only support x86_64 linux).
 
-**If you need software for other arch, try `cargo install` below.**
+**If you need software for other arch, try `cargo install` below or `cargo build` by yourself.**
 
 ## Usage
 
