@@ -22,7 +22,7 @@ cargo install aoit
 
 ### from release
 
-or just download from release [page](https://github.com/rikonaka/aoit-rs/releases) (only support x86_64 linux).
+or just download from release [page](https://github.com/rikonaka/aoit-rs/releases).
 
 **If you need software for other arch, try `cargo install` below or `cargo build` by yourself.**
 
