@@ -44,7 +44,7 @@ pub fn install_deb(aoitfile_name: &str) -> Result<()> {
     };
 
     // decompress 7z package
-    info!("decompress aoit...");
+    info!("decompress...");
     // let dest = format!("./{}", target_dir);
     utils::create_dir(&target_dir)?;
     sevenz_rust::decompress_file(aoitfile_name, &target_dir).expect("complete");

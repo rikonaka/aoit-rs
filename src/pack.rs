@@ -1,6 +1,6 @@
 use anyhow::Result;
 use glob::glob;
-use log::debug;
+// use log::debug;
 use log::error;
 use log::info;
 // use log::warn;
@@ -32,7 +32,7 @@ impl AptDepends {
 }
 
 fn resolve_depends(package_name: &str, packags_vec: &mut Vec<String>) -> Result<Vec<AptDepends>> {
-    debug!("resolve package: {package_name}");
+    info!("resolving: {package_name}");
     if packags_vec.contains(&package_name.to_string()) {
         return Ok(vec![]);
     } else {
@@ -116,7 +116,7 @@ pub fn pack_deb(package_name: &str) -> Result<()> {
     let mut packages_map = HashMap::new();
     for p in &packages_vec {
         let package_full_name = download_depends(p, &target_dir)?;
-        info!("downloading package: {p}[{package_full_name}]");
+        info!("downloading: {p}[{package_full_name}]");
         packages_map.insert(p.to_string(), package_full_name);
     }
 

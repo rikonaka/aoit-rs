@@ -1,6 +1,6 @@
 [package]
 name = "aoit"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 authors = ["Riko Naka <xxy1836@gmail.com>"]
 license = "GPL-3.0-only"
