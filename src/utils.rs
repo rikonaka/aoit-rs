@@ -21,43 +21,27 @@ pub fn remove_dir(target_dir: &str) -> Result<()> {
 }
 
 pub fn read_file_bytes(path: &str) -> Result<Vec<u8>> {
-    let mut file = match File::open(path) {
-        Ok(f) => f,
-        Err(e) => return Err(e.into()),
-    };
+    let mut file = File::open(path)?;
     let mut contents = Vec::new();
-    match file.read_to_end(&mut contents) {
-        Ok(_) => (),
-        Err(e) => return Err(e.into()),
-    }
+    file.read_to_end(&mut contents)?;
     Ok(contents)
 }
 
 pub fn read_file_str(path: &str) -> Result<String> {
-    let mut file = match File::open(path) {
-        Ok(f) => f,
-        Err(e) => return Err(e.into()),
-    };
+    let mut file = File::open(path)?;
     let mut contents = String::new();
-    match file.read_to_string(&mut contents) {
-        Ok(_) => (),
-        Err(e) => return Err(e.into()),
-    }
+    file.read_to_string(&mut contents)?;
     Ok(contents)
 }
 
 pub fn create_dir(dirname: &str) -> Result<()> {
-    match fs::create_dir(dirname) {
-        Ok(_) => Ok(()),
-        Err(e) => Err(e.into()),
-    }
+    fs::create_dir(dirname)?;
+    Ok(())
 }
 
 pub fn create_file(filename: &str) -> Result<File> {
-    match File::create(filename) {
-        Ok(f) => Ok(f),
-        Err(e) => Err(e.into()),
-    }
+    let f = File::create(filename)?;
+    Ok(f)
 }
 
 pub fn file_sha256(filename: &str) -> Result<String> {
@@ -77,17 +61,12 @@ pub fn write_to_file(filename: &str, contents: &str) -> Result<()> {
 }
 
 pub fn serde_config_to_file(filename: &str, serde_config: SerdeConfig) -> Result<()> {
-    let serialized = match serde_json::to_string(&serde_config) {
-        Ok(s) => s,
-        Err(e) => return Err(e.into()),
-    };
+    let serialized = serde_json::to_string(&serde_config)?;
     write_to_file(filename, &serialized)
 }
 
 pub fn serde_from_file(filename: &str) -> Result<SerdeConfig> {
     let contents = read_file_str(filename)?;
-    match serde_json::from_str(&contents) {
-        Ok(s) => Ok(s),
-        Err(e) => Err(e.into()),
-    }
+    let s = serde_json::from_str(&contents)?;
+    Ok(s)
 }

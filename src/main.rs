@@ -1,6 +1,7 @@
 use clap::Parser;
 use env_logger;
 use log::error;
+use log::info;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
@@ -66,6 +67,6 @@ fn main() {
             Err(e) => error!("install deb failed: {e}"),
         };
     } else {
-        println!("Use --help for more infomation");
+        info!("Use --help for more infomation");
     }
 }
