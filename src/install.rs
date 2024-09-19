@@ -20,6 +20,12 @@ fn install_depends(package_path: &str) -> Result<()> {
     Ok(())
 }
 
+fn install_fix() -> Result<()> {
+    let c = Command::new("apt").args(["install", "-f"]).output()?;
+    debug!("install fix output: {}", String::from_utf8_lossy(&c.stdout));
+    Ok(())
+}
+
 pub fn install_deb(aoitfile_name: &str) -> Result<()> {
     // aoitfile_name: vim.aoit
     // sha256 check
@@ -69,6 +75,8 @@ pub fn install_deb(aoitfile_name: &str) -> Result<()> {
     // delete decompress dir
     info!("removing tmp dir...");
     utils::remove_dir(&target_dir)?;
+
+    install_fix()?;
     info!("done!");
     Ok(())
 }
