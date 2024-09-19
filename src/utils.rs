@@ -11,12 +11,12 @@ use std::process::Command;
 use crate::SerdeConfig;
 
 pub fn move_file_to_dir(target_dir: &str, filename: &str) -> Result<()> {
-    let _ = Command::new("mv").arg(filename).arg(target_dir).output()?;
+    let _ = Command::new("mv").args([filename, target_dir]).output()?;
     Ok(())
 }
 
 pub fn remove_dir(target_dir: &str) -> Result<()> {
-    let _ = Command::new("rm").arg("-rf").arg(target_dir).output()?;
+    let _ = Command::new("rm").args(["-rf", target_dir]).output()?;
     Ok(())
 }
 

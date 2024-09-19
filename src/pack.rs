@@ -40,8 +40,7 @@ fn resolve_depends(package_name: &str, packags_vec: &mut Vec<String>) -> Result<
     }
 
     let command = Command::new("apt-cache")
-        .arg("depends")
-        .arg(package_name)
+        .args(["depends", package_name])
         .output()?;
 
     let mut ret = Vec::new();
@@ -78,8 +77,7 @@ fn resolve_depends_root(package_name: &str) -> Result<(AptDepends, Vec<String>)>
 
 fn download_depends(package_name: &str, target_dir: &str) -> Result<String> {
     let _ = Command::new("apt")
-        .arg("download")
-        .arg(package_name)
+        .args(["download", package_name])
         .output()?;
 
     let pattern = format!("{}*.deb", package_name);

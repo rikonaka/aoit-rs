@@ -13,8 +13,7 @@ use crate::DEFAULT_SHA256_SUFFIX;
 
 fn install_depends(package_path: &str) -> Result<()> {
     let c = Command::new("dpkg")
-        .arg("--install")
-        .arg(package_path)
+        .args(["--install", package_path])
         .output()?;
     debug!("install output: {}", String::from_utf8_lossy(&c.stdout));
     Ok(())
