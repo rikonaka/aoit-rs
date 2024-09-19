@@ -2,7 +2,7 @@
 
 Apt offline installation tool (support `Debian` family distribution only).
 
-[![Rust](https://github.com/rikonaka/aoit-rs/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/rikonaka/translator-rs/actions/workflows/rust.yml)
+[![Rust](https://github.com/rikonaka/aoit-rs/actions/workflows/rust.yml/badge.svg?branch=main)](https://github.com/rikonaka/aoit-rs/actions/workflows/rust.yml)
 
 ## Requirements
 
