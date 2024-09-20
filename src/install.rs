@@ -4,6 +4,7 @@ use log::error;
 use log::info;
 use log::warn;
 // use log::warn;
+use nix::unistd::getuid;
 use sevenz_rust;
 use std::process::Command;
 
@@ -26,6 +27,12 @@ fn install_fix() -> Result<()> {
 }
 
 pub fn install_deb(aoitfile_name: &str) -> Result<()> {
+    // root privilege check
+    let uid = getuid();
+    if !uid.is_root() {
+        error!("please check your root permissions!");
+        return Ok(());
+    }
     // aoitfile_name: vim.aoit
     // sha256 check
     info!("checking...");

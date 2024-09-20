@@ -1,6 +1,6 @@
 [package]
 name = "aoit"
-version = "0.1.9"
+version = "0.1.10"
 edition = "2021"
 authors = ["Riko Naka <xxy1836@gmail.com>"]
 license = "GPL-3.0-only"
@@ -19,7 +19,8 @@ clap = { version = "^4", features = ["derive"] }
 glob = "^0"
 serde = { version = "^1", features = ["derive"] }
 serde_json = "^1"
-sevenz-rust={version="^0", features=["compress"]}
+sevenz-rust={ version="^0", features=["compress"] }
 sha2 = "^0"
 log = "^0"
 env_logger = "^0"
+nix = { version="^0", features=["user"] }
